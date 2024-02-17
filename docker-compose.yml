@@ -1,0 +1,39 @@
+services:
+  h2o:
+   image: alpine
+   ports:
+     - '8080:8080'
+   entrypoint: /bin/sh
+   command:
+     - -c
+     - |
+       mkdir -p /var/html
+       cat << EOF > /var/html/index.html
+       <!DOCTYPE html>
+       <html lang="en">
+       <head>
+         <meta charset="UTF-8">
+         <title>h2o - yaml</title>
+       </head>
+       <body>
+         <h2>hello world</h2>
+       </body>
+       </html>
+       EOF
+
+       apk add --no-cache h2o
+
+       cat << EOF > /h2o.conf
+       access-log: /dev/stdout
+       error-log: /dev/stderr
+
+       hosts:
+         default:
+           listen:
+             port: 8080
+           paths:
+             /:
+               file.dir: /var/html
+       EOF
+
+       h2o test --conf /h2o.conf && h2o --conf /h2o.conf 
